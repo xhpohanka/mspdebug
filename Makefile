@@ -19,7 +19,7 @@
 CC ?= gcc
 INSTALL = /usr/bin/install
 PREFIX ?= /usr/local
-LDFLAGS ?= -s
+LDFLAGS ?= 
 
 BINDIR = ${PREFIX}/bin/
 MANDIR = ${PREFIX}/share/man/man1
@@ -61,7 +61,7 @@ else
     else ifneq ($(filter $(UNAME_S),SunOS),)
 	OS_LIBS = -lpthread -ldl -lresolv -lsocket -lnsl
     else
-	OS_LIBS = -lpthread -ldl
+	OS_LIBS = -lpthread -ldl -lwiringPi
     endif
 
     ifeq ($(UNAME_S),Darwin) # Mac OS X/MacPorts stuff
@@ -171,6 +171,7 @@ OBJ=\
     drivers/fet_olimex_db.o \
     drivers/jtdev.o \
     drivers/jtdev_gpio.o \
+    drivers/jtdev_gpio_pi.o \
     drivers/jtaglib.o \
     drivers/pif.o \
     drivers/loadbsl.o \

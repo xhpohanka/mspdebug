@@ -65,5 +65,6 @@ struct jtdev_func{
 
 extern const struct jtdev_func jtdev_func_pif;
 extern const struct jtdev_func jtdev_func_gpio;
+extern const struct jtdev_func jtdev_func_gpio_pi;
 
 #endif

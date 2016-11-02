@@ -382,7 +382,7 @@ static device_t gpio_open(const struct device_args *args)
   memset(dev, 0, sizeof(*dev));
   dev->base.type = &device_pif;
   dev->base.max_breakpoints = 0;
-  (&dev->jtag)->f = &jtdev_func_gpio;
+  (&dev->jtag)->f = &jtdev_func_gpio_pi;
 
   if ((&dev->jtag)->f->jtdev_open(&dev->jtag, args->path) < 0) {
     printc_err("gpio: can't open port\n");
