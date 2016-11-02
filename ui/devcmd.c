@@ -689,6 +689,24 @@ int cmd_prog(char **arg)
 	return do_cmd_prog(arg, PROG_WANT_ERASE);
 }
 
+int cmd_prog_verify(char **arg)
+{
+    int ret;
+    char *ptr = *arg;
+    char tmp[256];
+    strncpy(tmp, *arg, 256); //need to save argument for reuse because get_arg() strips quotes
+
+    ret = do_cmd_prog(arg, PROG_WANT_ERASE);
+    ptr = *arg;
+    *arg = tmp;
+    if (ret)
+        return ret;
+
+    ret = do_cmd_prog(arg, PROG_VERIFY);
+    *arg = ptr;
+    return ret;
+}
+
 int cmd_load(char **arg)
 {
 	return do_cmd_prog(arg, 0);

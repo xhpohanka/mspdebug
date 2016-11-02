@@ -115,6 +115,14 @@ const struct cmddb_record commands[] = {
 "    Erase the device and flash the data contained in a binary file.\n"
 "    This command also loads symbols from the file, if available.\n"
 	},
+    {
+        .name = "prog_verify",
+        .func = cmd_prog_verify,
+        .help =
+"prog <filename>\n"
+"    Erase the device and flash the data contained in a binary file, verifying at the end.\n"
+"    This command also loads symbols from the file, if available.\n"
+    },
 	{
 		.name = "load",
 		.func = cmd_load,
