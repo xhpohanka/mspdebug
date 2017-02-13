@@ -165,7 +165,8 @@ enum CONFIG_MODE {
 	/* set true to write the external SPI image of the L092 */
 	WRITE_EXTERNAL_MEMORY = 13,
 	/* set DEBUG_LPM_X true to start debugging of LPMx.5 */
-	DEBUG_LPM_X = 14
+	DEBUG_LPM_X = 14,
+	SET_INTERFACE_SPEED = 15
 };
 
 typedef void (*DLL430_EVENTNOTIFY_FUNC)

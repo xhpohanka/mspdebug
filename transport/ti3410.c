@@ -127,7 +127,9 @@ struct ti3410_transport {
 };
 
 #define USB_FET_VENDOR			0x0451
+//#define USB_FET_VENDOR			0x2047
 #define USB_FET_PRODUCT			0xf430
+//#define USB_FET_PRODUCT			0x0010
 
 #define USB_FET_INTERFACE		0
 #define USB_FET_IN_EP			0x81

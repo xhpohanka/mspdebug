@@ -63,6 +63,7 @@ struct tilib_api_table {
 	STATUS_T (*MSP430_FET_FwUpdate)(char* lpszFileName,
 					   DLL430_FET_NOTIFY_FUNC callback,
 					   long clientHandle);
+	void (*MSP430_HIL_Open)(void);
 };
 
 extern const struct tilib_api_table *tilib_api;

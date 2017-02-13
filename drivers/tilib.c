@@ -468,6 +468,7 @@ static int do_init(struct tilib_device *dev, const struct device_args *args)
 {
 	long version;
 	union DEVICE_T device;
+	int ret;
 
 	printc_dbg("MSP430_Initialize: %s\n", dev->uifPath);
 	if (tilib_api->MSP430_Initialize(dev->uifPath, &version) < 0) {
@@ -508,8 +509,12 @@ static int do_init(struct tilib_device *dev, const struct device_args *args)
 		return -1;
 	}
 
+	printc_dbg("MSP430 setting lower speed\n");
+	ret = tilib_api->MSP430_Configure(SET_INTERFACE_SPEED, 0);
+	printc_dbg("configure returned %d\n", ret);
+
 	/* Without this delay, MSP430_OpenDevice will often hang. */
-	delay_s(1);
+	delay_s(2);
 
 	printc_dbg("MSP430_OpenDevice\n");
 	if (tilib_api->MSP430_OpenDevice("DEVICE_UNKNOWN", "", 0, 0, 0) < 0) {

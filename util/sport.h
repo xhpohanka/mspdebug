@@ -32,6 +32,7 @@ typedef int sport_t;
 
 #define SPORT_MC_DTR		TIOCM_DTR
 #define SPORT_MC_RTS		TIOCM_RTS
+#define SPORT_MC_CTS		TIOCM_CTS
 
 #else /* __Windows__ */
 
