@@ -55,6 +55,7 @@ void sport_close(sport_t s);
 
 int sport_flush(sport_t s);
 int sport_set_modem(sport_t s, int bits);
+int sport_set_rate(sport_t s, int rate);
 
 /* Read/write a serial port. These functions return the number of
  * bytes transferred, or -1 on error.

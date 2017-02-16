@@ -235,6 +235,7 @@ static int rom_bsl_xfer(struct rom_bsl_device *dev,
 #define CMD_RX_DATA		0x12
 #define CMD_TX_VERSION		0x1e
 #define CMD_RX_PASSWORD		0x10
+#define CMD_BAUD_RATE		0x20
 
 static void rom_bsl_destroy(device_t dev_base)
 {
@@ -491,6 +492,19 @@ static device_t rom_bsl_open(const struct device_args *args)
 	if (unlock_device(dev) < 0) {
 		printc_err("rom_bsl: failed to unlock\n");
 		goto fail;
+	}
+
+
+	if (1) {
+	    // TODO: make it optional
+	    if (rom_bsl_xfer(dev, CMD_BAUD_RATE, 0x8c80, NULL, 0x0002) < 0) {
+	        printc_err("warning: rom_bsl: failed to change baud rate\n");
+	    }
+	    else {
+	        printc_dbg("Increasing baud rate\n");
+	        sport_set_rate(dev->fd, 36400);
+	        delay_ms(100);
+	    }
 	}
 
 	return (device_t)dev;

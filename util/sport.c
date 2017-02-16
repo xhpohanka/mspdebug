@@ -52,6 +52,8 @@ struct baud_rate {
 
 static const struct baud_rate baud_rates[] = {
 	{9600,          B9600},
+	{19200,         B19200},
+	{36400,         B38400},
 	{115200,        B115200},
 	{460800,        B460800},
 	{500000,        B500000}
@@ -166,6 +168,26 @@ int sport_flush(sport_t s)
 int sport_set_modem(sport_t s, int bits)
 {
 	return ioctl(s, TIOCMSET, &bits);
+}
+
+int sport_set_rate(sport_t s, int rate)
+{
+    int fd = (int) s;
+    struct termios attr;
+    int rate_code = rate_to_code(rate);
+
+    if (rate_code < 0)
+        return -1;
+
+    tcgetattr(fd, &attr);
+
+    cfsetispeed(&attr, rate_code);
+    cfsetospeed(&attr, rate_code);
+
+    if (tcsetattr(fd, TCSAFLUSH, &attr) < 0)
+        return -1;
+
+    return 0;
 }
 
 int sport_read(sport_t s, uint8_t *data, int len)
