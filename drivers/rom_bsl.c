@@ -304,7 +304,7 @@ static int rom_bsl_writemem(device_t dev_base,
 	}
 
 	while (len) {
-		int wlen = len > 100 ? 100 : len;
+		int wlen = len > 240 ? 240: len; // 250 is max size in docs
 		int r;
 		uint8_t memtmp[256];
 		const uint8_t *memptr;
@@ -361,8 +361,8 @@ static int rom_bsl_readmem(device_t dev_base,
 		    align = 1;
 		}
 
-		if (count > 220)
-			count = 220;
+		if (count > 240) // 250 is max size in docs
+			count = 240;
 
 		if (rom_bsl_xfer(dev, CMD_TX_DATA, addr, NULL, count) < 0) {
 			printc_err("rom_bsl: failed to read memory\n");
