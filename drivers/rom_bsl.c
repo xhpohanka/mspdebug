@@ -233,6 +233,7 @@ static int rom_bsl_xfer(struct rom_bsl_device *dev,
 #define CMD_ERASE_SEGMENT	0x16
 #define CMD_TX_DATA		0x14
 #define CMD_RX_DATA		0x12
+#define CMD_LOAD_PC		0x1a
 #define CMD_TX_VERSION		0x1e
 #define CMD_RX_PASSWORD		0x10
 #define CMD_BAUD_RATE		0x20
@@ -240,8 +241,12 @@ static int rom_bsl_xfer(struct rom_bsl_device *dev,
 static void rom_bsl_destroy(device_t dev_base)
 {
 	struct rom_bsl_device *dev = (struct rom_bsl_device *)dev_base;
+	const char *exit_seq = bsllib_seq_next(dev->seq);
 
-	if (bsllib_seq_do(dev->fd, bsllib_seq_next(dev->seq)) < 0)
+	if (*exit_seq) // jump from bootloader by altering program counter
+	    rom_bsl_xfer(dev, CMD_LOAD_PC, 0x0000, NULL, 0);
+
+	if (bsllib_seq_do(dev->fd, exit_seq) < 0)
 		pr_error("warning: rom_bsl: exit sequence failed");
 
 	sport_close(dev->fd);
