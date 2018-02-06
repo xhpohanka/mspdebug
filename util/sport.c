@@ -53,7 +53,7 @@ struct baud_rate {
 static const struct baud_rate baud_rates[] = {
 	{9600,          B9600},
 	{19200,         B19200},
-	{36400,         B38400},
+	{38400,         B38400},
 	{115200,        B115200},
 	{460800,        B460800},
 	{500000,        B500000}

@@ -507,7 +507,10 @@ static device_t rom_bsl_open(const struct device_args *args)
 	    }
 	    else {
 	        printc_dbg("Increasing baud rate\n");
-	        sport_set_rate(dev->fd, 36400);
+	        // sport_set_rate(dev->fd, 19200);
+	        sport_set_rate(dev->fd, 38400);
+	        // sport_set_rate(dev->fd, 57600);
+	        // sport_set_rate(dev->fd, 115200);
 	        delay_ms(100);
 	    }
 	}
