@@ -31,7 +31,7 @@
 #include <linux/serial.h>
 #endif
 
-#define TIMEOUT_S	30
+#define TIMEOUT_S	5
 
 #ifndef __Windows__
 
