@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stddef.h>
 #include "util/util.h"
 #include "bsllib.h"
 #include "gpio.h"
@@ -112,6 +113,9 @@ int bsllib_seq_do_gpio(int rts, int dtr, const char *seq)
 
 const char *bsllib_seq_next(const char *seq)
 {
+	if (seq == NULL)
+		return NULL;
+
 	while (*seq && *seq != ':')
 		seq++;
 

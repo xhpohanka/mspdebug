@@ -29,11 +29,15 @@
 #include "bsllib.h"
 #include "util/sport.h"
 
+// #define DEBUG_ROM_BSL
+
 struct rom_bsl_device {
 	struct device   base;
 
 	sport_t		fd;
 	const char	*seq;
+	int bsl_gpio_rts;
+	int bsl_gpio_dtr;
 
 	uint8_t         reply_buf[256];
 	int             reply_len;
@@ -243,11 +247,19 @@ static void rom_bsl_destroy(device_t dev_base)
 	struct rom_bsl_device *dev = (struct rom_bsl_device *)dev_base;
 	const char *exit_seq = bsllib_seq_next(dev->seq);
 
-	if (*exit_seq) // jump from bootloader by altering program counter
+	if (dev->seq == NULL || *exit_seq) // jump from bootloader by altering program counter
 	    rom_bsl_xfer(dev, CMD_LOAD_PC, 0x0000, NULL, 0);
 
-	if (bsllib_seq_do(dev->fd, exit_seq) < 0)
-		pr_error("warning: rom_bsl: exit sequence failed");
+	if (dev->seq) {
+	    if (dev->bsl_gpio_rts > 0) {
+	        if (bsllib_seq_do_gpio(dev->bsl_gpio_rts, dev->bsl_gpio_dtr, exit_seq) < 0)
+	            pr_error("warning: rom_bsl: exit sequence failed");
+	    }
+	    else {
+	        if (bsllib_seq_do(dev->fd, exit_seq) < 0)
+	            pr_error("warning: rom_bsl: exit sequence failed");
+	    }
+	}
 
 	sport_close(dev->fd);
 	free(dev);
@@ -410,28 +422,38 @@ static int rom_bsl_erase(device_t dev_base, device_erase_type_t type,
 	return 0;
 }
 
-static int unlock_device(struct rom_bsl_device *dev)
+static int unlock_device(struct rom_bsl_device *dev, int force_erase)
 {
-	const static uint8_t password[32] = {
+	const static uint8_t password_blank[32] = {
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	};
 
-	printc_dbg("Performing mass erase...\n");
-
-	if (rom_bsl_xfer(dev, CMD_MASS_ERASE, 0xfffe, NULL, 0xa506) < 0) {
-		printc_err("rom_bsl: initial mass erase failed\n");
-		return -1;
-	}
+	const static uint8_t password[32] = {
+		0x7C,0xEB,0x78,0xE9,0x08,0xF1,0xD6,0xE7,0xFF,0xFF,0x1A,0xE8,0x4E,0xE7,0x74,0xD0,
+		0x1E,0xBD,0x3C,0xEF,0x0E,0xE3,0xC6,0xE6,0x0C,0xEB,0x0A,0xDD,0xFF,0xFF,0x00,0x12,
+	};
 
 	printc_dbg("Sending password...\n");
 
-	if (rom_bsl_xfer(dev, CMD_RX_PASSWORD, 0,
-			 password, sizeof(password)) < 0) {
+	if (rom_bsl_xfer(dev, CMD_RX_PASSWORD, 0, (uint8_t *)password, 32) < 0 || force_erase)
+	{
 		printc_err("rom_bsl: RX password failed\n");
-		return -1;
+
+		printc_dbg("Performing mass erase...\n");
+
+		if (rom_bsl_xfer(dev, CMD_MASS_ERASE, 0xfffe, NULL, 0xa506) < 0) {
+			printc_err("rom_bsl: initial mass erase failed\n");
+			return -1;
+		}
+
+		if (rom_bsl_xfer(dev, CMD_RX_PASSWORD, 0,
+			 (uint8_t *)password_blank, 32) < 0) {
+			printc_err("rom_bsl: RX password failed\n");
+			return -1;
+		}
 	}
 
 	return 0;
@@ -464,21 +486,25 @@ static device_t rom_bsl_open(const struct device_args *args)
 	}
 
 	dev->seq = args->bsl_entry_seq;
-	if (!dev->seq)
-		dev->seq = "DR,r,R,r,d,R:DR,r";
-
-	if ( args->bsl_gpio_used )
-	{
-		if (bsllib_seq_do_gpio(args->bsl_gpio_rts, args->bsl_gpio_dtr, dev->seq) < 0) {
-			pr_error("rom_bsl: entry sequence failed");
-			goto fail;
+	printf("seq: %x\n", dev->seq);
+	if (dev->seq) {
+		if ( args->bsl_gpio_used )
+		{
+			dev->bsl_gpio_rts = args->bsl_gpio_rts;
+			dev->bsl_gpio_dtr = args->bsl_gpio_dtr;
+			if (bsllib_seq_do_gpio(args->bsl_gpio_rts, args->bsl_gpio_dtr, dev->seq) < 0) {
+				pr_error("rom_bsl: entry sequence failed");
+				goto fail;
+			}
 		}
-	}
-	else
-	{
-		if (bsllib_seq_do(dev->fd, dev->seq) < 0) {
-			pr_error("rom_bsl: entry sequence failed");
-			goto fail;
+		else
+		{
+			dev->bsl_gpio_rts = -1;
+			dev->bsl_gpio_dtr = -1;
+			if (bsllib_seq_do(dev->fd, dev->seq) < 0) {
+				pr_error("rom_bsl: entry sequence failed");
+				goto fail;
+			}
 		}
 	}
 
@@ -494,7 +520,7 @@ static device_t rom_bsl_open(const struct device_args *args)
 			   dev->reply_buf[15],
 			   dev->reply_buf[16]);
 
-	if (unlock_device(dev) < 0) {
+	if (unlock_device(dev, args->flags & DEVICE_FLAG_FORCE_EERASE) < 0) {
 		printc_err("rom_bsl: failed to unlock\n");
 		goto fail;
 	}
