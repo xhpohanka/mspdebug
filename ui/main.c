@@ -155,6 +155,8 @@ static void usage(const char *progname)
 "        On some host (say RaspberryPi) defines a GPIO pin# to be used as DTR\n"
 "    --bsl-force-erase\n"
 "        Erase even if BSL respond ACK to password\n"
+"    --bsl-password\n"
+"        Name of binary file containing password sequence\n"
 "\n"
 "Most drivers connect by default via USB, unless told otherwise via the\n"
 "-d option. By default, the first USB device found is opened.\n"
@@ -257,6 +259,7 @@ static int parse_cmdline_args(int argc, char **argv,
 		LOPT_BSL_GPIO_RTS,
 		LOPT_BSL_GPIO_DTR,
 		LOPT_BSL_FORCE_ERASE,
+		LOPT_BSL_PASSWORD,
 	};
 
 	static const struct option longopts[] = {
@@ -275,6 +278,7 @@ static int parse_cmdline_args(int argc, char **argv,
 		{"bsl-gpio-rts",	1, 0, LOPT_BSL_GPIO_RTS},
 		{"bsl-gpio-dtr",	1, 0, LOPT_BSL_GPIO_DTR},
 		{"bsl-force-erase",	0, 0, LOPT_BSL_FORCE_ERASE},
+		{"bsl-password",	1, 0, LOPT_BSL_PASSWORD},
 		{NULL, 0, 0, 0}
 	};
 
@@ -304,6 +308,9 @@ static int parse_cmdline_args(int argc, char **argv,
 		case LOPT_BSL_FORCE_ERASE:
 			args->devarg.flags |= DEVICE_FLAG_FORCE_EERASE;
 			break;
+		case LOPT_BSL_PASSWORD:
+		    args->devarg.bsl_password_file = optarg;
+		    break;
 
 		case LOPT_BSL_GPIO_RTS:
 			args->devarg.bsl_gpio_used = 1;

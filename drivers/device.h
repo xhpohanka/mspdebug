@@ -84,6 +84,7 @@ struct device_args {
 	const char		*requested_serial;
 	const char		*require_fwupdate;
 	const char		*bsl_entry_seq;
+	const char		*bsl_password_file;
 	int			bsl_gpio_used;
 	int			bsl_gpio_rts;
 	int			bsl_gpio_dtr;
